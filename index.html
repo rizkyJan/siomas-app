@@ -86,13 +86,6 @@
             <div class="p-4 md:p-8">
 
                 <section id="section-dashboard" class="section-content section-active">
-		    
-                    <div class="bg-blue-600 rounded-2xl p-8 text-white relative overflow-hidden shadow-lg shadow-blue-200">
-                        <div class="relative z-10">
-                            <h2 class="text-2xl font-bold mb-2">Selamat Datang di SIOMAS PRO!</h2>
-                            <p class="text-blue-100 max-w-md">Sistem Informasi Pengelolaan Air Masyarakat Berbasis Serverless.</p>
-                        </div>
-                    </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-8">
                         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center">
                             <div class="bg-blue-100 p-4 rounded-xl text-blue-600 mr-4"><i data-lucide="users"></i></div>
@@ -116,6 +109,12 @@
                             </div>
                         </div>
                     </div>
+                    <div class="bg-blue-600 rounded-2xl p-8 text-white relative overflow-hidden shadow-lg shadow-blue-200">
+                        <div class="relative z-10">
+                            <h2 class="text-2xl font-bold mb-2">Selamat Datang di SIOMAS PRO!</h2>
+                            <p class="text-blue-100 max-w-md">Sistem Informasi Pengelolaan Air Masyarakat Berbasis Serverless.</p>
+                        </div>
+                    </div>
                 </section>
 
                 <section id="section-input" class="section-content">
@@ -132,7 +131,6 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pelanggan (Belum Diinput)</label>
                                 <select id="inp-id" onchange="updateMeterAwalDisplay()" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"></select>
                             </div>
-                            
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Angka Meteran Awal (Bulan Lalu)</label>
                                 <div class="relative">
@@ -140,7 +138,6 @@
                                     <span class="absolute right-4 top-3.5 text-gray-400 font-medium">m³</span>
                                 </div>
                             </div>
-
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Angka Meteran Akhir (Saat Ini)</label>
                                 <div class="relative">
@@ -179,10 +176,10 @@
                                         <th class="p-4 font-semibold text-center">Meter Akhir</th>
                                         <th class="p-4 font-semibold text-center">Pemakaian</th>
                                         <th class="p-4 font-semibold text-right">Total (Rp)</th>
-                                    </tr>
+                                        <th class="p-4 font-semibold text-center">Aksi</th> </tr>
                                 </thead>
                                 <tbody id="tabel-tagihan" class="text-sm divide-y divide-gray-100">
-                                    <tr><td colspan="6" class="p-6 text-center text-gray-500">Silakan pilih periode untuk melihat laporan</td></tr>
+                                    <tr><td colspan="7" class="p-6 text-center text-gray-500">Silakan pilih periode untuk melihat laporan</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -260,7 +257,7 @@
         const URL_API = "https://script.google.com/macros/s/AKfycbxxqFfmblQNJZ1NSqHBSMT0_Ly9Q-l2GwZsSgR8Ea3EMdYhHHibfQR487nt--Qy_BopOQ/exec";
         
         let globalDataPelanggan = []; 
-        let globalBelumInput = []; // Variabel khusus untuk menyimpan data array meter awal
+        let globalBelumInput = []; 
 
         lucide.createIcons();
 
@@ -321,13 +318,11 @@
             const p = document.getElementById('inp-periode').value;
             const selId = document.getElementById("inp-id");
             const btnSave = document.getElementById("btn-save");
-            
-            document.getElementById('disp-meter-awal').value = ""; // Reset tampilan meter awal
+            document.getElementById('disp-meter-awal').value = ""; 
 
             if (!p) { selId.innerHTML = '<option value="">-- Pilih Periode Dulu --</option>'; return; }
             
             selId.innerHTML = '<option value="">Mensinkronkan data...</option>';
-            
             try {
                 const res = await fetch(URL_API, { method: "POST", body: JSON.stringify({ action: "getPelangganBelumInput", namaPeriode: p }) }).then(r=>r.json());
                 if (res.status === "success") {
@@ -336,36 +331,24 @@
                         btnSave.disabled = true;
                         globalBelumInput = [];
                     } else {
-                        globalBelumInput = res.data; // Simpan data (termasuk meterAwal) ke global
+                        globalBelumInput = res.data; 
                         selId.innerHTML = `<option value="">-- Pilih Warga -- (${res.data.length} tersisa)</option>`;
                         res.data.forEach(x => selId.innerHTML += `<option value="${x.id}">${x.id} - ${x.nama}</option>`);
                         btnSave.disabled = false;
-                        
-                        // Coba otomatis tampilkan Meter Awal jika data ada
                         updateMeterAwalDisplay();
                     }
                 }
             } catch (e) {}
         }
 
-        // FUNGSI BARU: Untuk menampilkan Meter Awal saat Dropdown berganti
         function updateMeterAwalDisplay() {
             const selectedId = document.getElementById("inp-id").value;
             const dispMeterAwal = document.getElementById("disp-meter-awal");
-            
-            if (!selectedId) {
-                dispMeterAwal.value = "";
-                return;
-            }
-            
-            // Cari data meterAwal dari array globalBelumInput
+            if (!selectedId) { dispMeterAwal.value = ""; return; }
             const userData = globalBelumInput.find(p => p.id === selectedId);
-            if (userData) {
-                dispMeterAwal.value = userData.meterAwal;
-            }
+            if (userData) dispMeterAwal.value = userData.meterAwal;
         }
 
-        // VALIDASI SAAT KLIK SIMPAN
         async function handleInput() {
             const periode = document.getElementById('inp-periode').value;
             const id = document.getElementById('inp-id').value;
@@ -373,37 +356,31 @@
             const meterAwal = document.getElementById('disp-meter-awal').value;
 
             if(!periode || !id || !meterAkhir) return Swal.fire('Oops!', 'Lengkapi form tagihan terlebih dahulu.', 'warning');
-            
-            // VALIDASI PENTING: Mencegah input meter akhir lebih kecil dari meter awal
             if(parseInt(meterAkhir) < parseInt(meterAwal)) {
-                return Swal.fire({
-                    icon: 'error',
-                    title: 'Input Tidak Valid!',
-                    text: `Angka meteran akhir (${meterAkhir}) tidak boleh lebih kecil dari meteran awal bulan lalu (${meterAwal}). Silakan cek kembali meternya.`
-                });
+                return Swal.fire({ icon: 'error', title: 'Input Tidak Valid!', text: `Meter akhir (${meterAkhir}) tidak boleh lebih kecil dari meter awal (${meterAwal}).` });
             }
 
             Swal.fire({ title: 'Menyimpan...', didOpen: () => Swal.showLoading() });
-            
             try {
                 const res = await fetch(URL_API, { method: "POST", body: JSON.stringify({ action: "inputMeter", namaPeriode: periode, idPelanggan: id, meterAkhir: parseInt(meterAkhir) }) }).then(r=>r.json());
                 if(res.status === "success") {
                     Swal.fire({ title: 'Sukses!', text: res.pesan, icon: 'success', timer: 2000, showConfirmButton: false });
                     document.getElementById('inp-meter').value = "";
-                    loadPelangganBelumInput(); 
+                    loadPelangganBelumInput();
+                    loadDataTagihan(); // Update tabel laporan sekalian
                 } else Swal.fire('Gagal', res.pesan, 'error');
             } catch (err) {}
         }
 
-        // LAPORAN TAGIHAN
+        // LAPORAN TAGIHAN & CRUD TAGIHAN
         async function loadDataTagihan() {
             const periode = document.getElementById('filter-periode').value;
             const tbody = document.getElementById('tabel-tagihan');
             const txtTotal = document.getElementById('total-pendapatan');
             
-            if(!periode) { tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-gray-500">Pilih periode dulu</td></tr>'; txtTotal.innerText="Rp 0"; return; }
+            if(!periode) { tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-gray-500">Pilih periode dulu</td></tr>'; txtTotal.innerText="Rp 0"; return; }
             
-            tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-blue-500 font-bold animate-pulse">Menarik data dari server...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-blue-500 font-bold animate-pulse">Menarik data dari server...</td></tr>';
             txtTotal.innerText = "Menghitung...";
 
             try {
@@ -413,7 +390,7 @@
                     tbody.innerHTML = "";
                     
                     if(res.data.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-gray-500">Belum ada tagihan yang dicatat di bulan ini.</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-gray-500">Belum ada tagihan yang dicatat di bulan ini.</td></tr>';
                         txtTotal.innerText = "Rp 0";
                         return;
                     }
@@ -428,13 +405,80 @@
                                 <td class="p-4 text-center font-bold text-blue-600">${item.meterAkhir}</td>
                                 <td class="p-4 text-center"><span class="bg-blue-100 text-blue-700 py-1 px-2 rounded text-xs">${item.pemakaian} m³</span></td>
                                 <td class="p-4 text-right font-bold text-green-600">${formatRp(item.total)}</td>
+                                <td class="p-4 text-center space-x-1">
+                                    <button onclick="editTagihan('${item.id}', '${item.nama}', ${item.meterAwal}, ${item.meterAkhir})" class="p-1.5 bg-yellow-100 text-yellow-600 hover:bg-yellow-200 rounded" title="Revisi Meter"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                    <button onclick="hapusTagihan('${item.id}', '${item.nama}')" class="p-1.5 bg-red-100 text-red-600 hover:bg-red-200 rounded" title="Batalkan Tagihan"><i data-lucide="x-circle" class="w-4 h-4"></i></button>
+                                </td>
                             </tr>
                         `;
                     });
+                    lucide.createIcons();
                     txtTotal.innerText = formatRp(totalSemua);
                 }
-            } catch (e) {
-                tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-red-500">Gagal menarik data</td></tr>';
+            } catch (e) { tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-red-500">Gagal menarik data</td></tr>'; }
+        }
+
+        // EDIT METER AKHIR DI LAPORAN
+        async function editTagihan(id, nama, meterAwal, meterAkhirLama) {
+            const periode = document.getElementById('filter-periode').value;
+            
+            const { value: meterBaru } = await Swal.fire({
+                title: `Revisi Tagihan ${nama}`,
+                html: `Meter Awal: <b>${meterAwal}</b><br><br>Masukkan Meter Akhir yang benar:`,
+                input: 'number',
+                inputValue: meterAkhirLama,
+                showCancelButton: true,
+                confirmButtonText: 'Update Tagihan',
+                cancelButtonText: 'Batal',
+                inputValidator: (value) => {
+                    if (!value) return 'Angka tidak boleh kosong!';
+                    if (parseInt(value) < meterAwal) return 'Tidak boleh lebih kecil dari meter awal!';
+                }
+            });
+
+            if (meterBaru && parseInt(meterBaru) !== parseInt(meterAkhirLama)) {
+                Swal.fire({ title: 'Menyimpan Update...', didOpen: () => Swal.showLoading() });
+                try {
+                    const res = await fetch(URL_API, {
+                        method: "POST",
+                        body: JSON.stringify({ action: "updateTagihan", namaPeriode: periode, idPelanggan: id, meterAkhirBaru: parseInt(meterBaru) })
+                    }).then(r=>r.json());
+                    
+                    if(res.status === "success") {
+                        Swal.fire('Berhasil!', res.pesan, 'success');
+                        loadDataTagihan();
+                    } else Swal.fire('Gagal', res.pesan, 'error');
+                } catch (e) { Swal.fire('Error', 'Koneksi gagal', 'error'); }
+            }
+        }
+
+        // BATALKAN TAGIHAN DI LAPORAN
+        async function hapusTagihan(id, nama) {
+            const periode = document.getElementById('filter-periode').value;
+            
+            const confirm = await Swal.fire({
+                title: 'Batalkan Tagihan?',
+                text: `Tagihan ${nama} akan dihapus dan dikembalikan ke antrean "Belum Bayar".`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Ya, Batalkan!'
+            });
+
+            if (confirm.isConfirmed) {
+                Swal.fire({ title: 'Membatalkan...', didOpen: () => Swal.showLoading() });
+                try {
+                    const res = await fetch(URL_API, {
+                        method: "POST",
+                        body: JSON.stringify({ action: "hapusTagihan", namaPeriode: periode, idPelanggan: id })
+                    }).then(r=>r.json());
+                    
+                    if(res.status === "success") {
+                        Swal.fire('Dibatalkan!', res.pesan, 'success');
+                        loadDataTagihan();
+                        loadPelangganBelumInput(); // Mengembalikan nama ke form input
+                    } else Swal.fire('Gagal', res.pesan, 'error');
+                } catch (e) { Swal.fire('Error', 'Koneksi gagal', 'error'); }
             }
         }
 
@@ -456,7 +500,7 @@
             }
         }
 
-        // CRUD PELANGGAN
+        // CRUD MASTER PELANGGAN
         function renderTabelPelanggan(dataArray) {
             const tbody = document.getElementById('tabel-pelanggan');
             tbody.innerHTML = "";
