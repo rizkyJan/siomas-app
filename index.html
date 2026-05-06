@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIOMAS PRO | Dashboard Serverless</title>
+    <title>SIOMAS PRO | TIRTA GIANTI </title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -15,32 +15,54 @@
         .section-active { display: block; animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* === CSS KHUSUS PRINT === */
+        /* === CSS KHUSUS PRINT (ANTI TERPOTONG & ANTI HEADER LINK) === */
         @media print {
-            @page { size: A4 portrait; margin: 1cm; }
-            body { background-color: white !important; margin: 0; padding: 0; }
+            /* Set margin 0 untuk menghilangkan Header Link & Footer dari Browser */
+            @page { size: A4 portrait; margin: 0 !important; }
+            
+            body { background-color: white !important; margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             #app-container { display: none !important; } 
             #print-area { display: block !important; width: 100%; color: black !important; } 
             
-            /* 1. Style Khusus Nota 1/4 Kertas */
-            .print-grid { display: flex; flex-wrap: wrap; justify-content: space-between; align-content: flex-start; }
+            /* 1. Style Khusus Nota (Pasti 4 Per Halaman) */
+            .print-page { 
+                width: 210mm; /* Ukuran lebar A4 */
+                height: 296mm; /* Ukuran tinggi A4 */
+                padding: 10mm; /* Margin buatan sebagai ganti margin bawaan browser */
+                box-sizing: border-box;
+                display: flex; 
+                flex-wrap: wrap; 
+                justify-content: space-between; 
+                align-content: flex-start;
+                page-break-after: always; /* Pasti ganti halaman tiap 4 nota */
+                break-after: page;
+            }
+            .print-page:last-child {
+                page-break-after: auto;
+                break-after: auto;
+            }
             .nota-card {
-                width: 48%; height: 13.5cm; box-sizing: border-box;
-                border: 1.5px dashed black !important; padding: 0.5cm !important; margin-bottom: 0.5cm;
+                width: 48%; 
+                height: 130mm; /* Tinggi pas agar 2 baris muat 1 halaman tanpa terdorong */
+                box-sizing: border-box;
+                border: 1.5px dashed black !important; 
+                padding: 5mm !important; 
+                margin-bottom: 6mm;
                 page-break-inside: avoid;
+                break-inside: avoid;
             }
             .nota-card * { color: black !important; background: white !important; border-color: black !important; }
             
-            /* 2. Style Khusus Tabel Rekap (FONT BESAR UNTUK LANSIA 50+) */
-            .rekap-container { width: 100%; font-family: 'Times New Roman', serif; }
+            /* 2. Style Khusus Tabel Rekap (Diberi padding karena margin kertas kita 0) */
+            .rekap-container { width: 100%; font-family: 'Times New Roman', serif; padding: 10mm; box-sizing: border-box; }
             .rekap-header { text-align: center; margin-bottom: 20px; border-bottom: 3px solid black; padding-bottom: 10px; }
             .rekap-header h2 { font-size: 20pt; font-weight: bold; margin: 0; text-transform: uppercase; }
             .rekap-header p { font-size: 14pt; margin: 5px 0; }
             
-            .rekap-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 14pt; } /* FONT BESAR 14pt */
+            .rekap-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 14pt; } 
             .rekap-table th, .rekap-table td { border: 1px solid black; padding: 10px; text-align: left; }
             .rekap-table th { background-color: #f0f0f0 !important; -webkit-print-color-adjust: exact; text-align: center; }
-            .rekap-table tr { page-break-inside: avoid; } /* Agar baris tidak terpotong di tengah halaman */
+            .rekap-table tr { page-break-inside: avoid; break-inside: avoid;} 
             
             .rekap-ttd { width: 100%; margin-top: 30px; font-size: 14pt; display: flex; justify-content: flex-end; }
             .rekap-ttd-box { text-align: center; width: 250px; }
@@ -223,7 +245,6 @@
                                 </div>
                                 <div class="flex gap-2">
                                     <button onclick="tarikDataRekap()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 font-semibold whitespace-nowrap">Tarik Data</button>
-                                    <!-- DUA TOMBOL CETAK BARU -->
                                     <button onclick="cetakPDFRekap('admin')" id="btn-print-admin" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 font-bold flex items-center gap-2 hidden whitespace-nowrap"><i data-lucide="file-text" class="w-4 h-4"></i> Cetak Admin</button>
                                     <button onclick="cetakPDFRekap('pelanggan')" id="btn-print-pelanggan" class="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 font-bold flex items-center gap-2 hidden whitespace-nowrap"><i data-lucide="file-text" class="w-4 h-4"></i> Cetak Pelanggan</button>
                                 </div>
@@ -483,7 +504,6 @@
             const tbody = document.getElementById('tabel-rekap-preview');
             tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-blue-500 font-bold animate-pulse">Menarik data dari server...</td></tr>';
             
-            // Sembunyikan tombol cetak saat loading
             document.getElementById('btn-print-admin').classList.add('hidden');
             document.getElementById('btn-print-pelanggan').classList.add('hidden');
             
@@ -525,7 +545,6 @@
                     });
                     document.getElementById('rekap-total-rp').innerText = formatRp(total);
                     
-                    // Munculkan kedua tombol print
                     document.getElementById('btn-print-admin').classList.remove('hidden'); 
                     document.getElementById('btn-print-pelanggan').classList.remove('hidden'); 
                     Swal.close();
@@ -536,7 +555,7 @@
             }
         }
 
-        // FUNGSI CETAK REKAP DENGAN 2 PILIHAN (ADMIN / PELANGGAN)
+        // FUNGSI CETAK REKAP DENGAN PEMBAGIAN BERDASARKAN HALAMAN MOBILE (PER 4 NOTA) UNTUK KEAMANAN
         function cetakPDFRekap(tipeCetak) {
             const tipe = document.getElementById('rekap-tipe').value;
             const filter = tipe === 'bulan' ? document.getElementById('rekap-val-bulan').value : document.getElementById('rekap-val-tahun').value;
@@ -641,17 +660,31 @@
             return `<div class="nota-card flex flex-col justify-between"><div><div class="text-center border-b-2 border-black pb-2 mb-3"><h2 class="font-black text-xl tracking-wide uppercase m-0">NOTA TAGIHAN AIR</h2><p class="font-bold text-base m-0">PAMSIMAS</p></div><div class="flex justify-between font-bold text-sm mb-3 border border-black p-1"><span>ID: ${p.id}</span><span>Bulan: ${periode}</span></div><div class="mb-3"><p class="text-xs font-bold mb-0">Diberikan Kepada:</p><p class="text-lg font-black uppercase">${p.nama}</p></div><table class="w-full text-sm font-medium mb-3"><tr class="border-b border-black"><td class="py-1">Meter Awal</td><td class="px-1">:</td><td class="text-right">${p.meterAwal} m³</td></tr><tr class="border-b border-black"><td class="py-1">Meter Akhir</td><td class="px-1">:</td><td class="text-right">${p.meterAkhir} m³</td></tr><tr class="border-b-2 border-black border-dashed"><td class="py-1 font-bold">Total Pemakaian</td><td class="px-1">:</td><td class="text-right font-black text-base">${p.pemakaian} m³</td></tr><tr><td class="py-1 mt-1">Tarif Air (${p.pemakaian} x Rp 1.000)</td><td class="px-1 mt-1">:</td><td class="text-right mt-1">${formatRp(p.pemakaian * 1000)}</td></tr><tr class="border-b-2 border-black"><td class="py-1 mb-1">Biaya Beban/Admin</td><td class="px-1 mb-1">:</td><td class="text-right mb-1">Rp 5.000</td></tr><tr class="font-black text-lg border-b-2 border-black"><td class="py-2">TOTAL BAYAR</td><td class="py-2">:</td><td class="text-right py-2">${formatRp(p.total)}</td></tr></table></div><div class="flex justify-between items-end mt-2"><div class="text-[10px] italic"><p>* Harap simpan nota ini</p><p>* sebagai bukti pembayaran sah.</p></div><div class="text-center"><p class="mb-8 font-semibold text-xs">Petugas,</p><p class="font-black underline text-sm">Mujiyono</p></div></div></div>`;
         }
 
+        // FUNGSI CETAK SEMUA NOTA (DIPERBARUI UNTUK MOBILE)
         function cetakSemuaNota() {
             const periode = document.getElementById('filter-periode').value;
             if(!periode || globalDataTagihan.length === 0) return Swal.fire('Oops', 'Pilih periode yang ada datanya.', 'warning');
-            let html = '<div class="print-grid">'; globalDataTagihan.forEach((p) => { html += generateHTMLNota(p, periode); }); html += '</div>';
-            document.getElementById('print-area').innerHTML = html; window.print();
+            
+            let html = '';
+            // Loop per 4 nota agar dibuatkan "Page" khusus (mengakali margin HP)
+            for (let i = 0; i < globalDataTagihan.length; i += 4) {
+                html += '<div class="print-page">';
+                for (let j = 0; j < 4; j++) {
+                    if (globalDataTagihan[i + j]) {
+                        html += generateHTMLNota(globalDataTagihan[i + j], periode);
+                    }
+                }
+                html += '</div>';
+            }
+            
+            document.getElementById('print-area').innerHTML = html; 
+            window.print();
         }
 
         function cetakNotaIndividu(id) {
             const periode = document.getElementById('filter-periode').value;
             const p = globalDataTagihan.find(x => x.id === id);
-            if(p) { document.getElementById('print-area').innerHTML = '<div class="print-grid">' + generateHTMLNota(p, periode) + '</div>'; window.print(); }
+            if(p) { document.getElementById('print-area').innerHTML = '<div class="print-page">' + generateHTMLNota(p, periode) + '</div>'; window.print(); }
         }
 
         async function editTagihan(id, nama, meterAwal, meterAkhirLama) {
