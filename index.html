@@ -102,7 +102,6 @@
             <div class="p-4 md:p-8">
 
                 <section id="section-dashboard" class="section-content section-active">
-		    
                     <div class="bg-blue-600 rounded-2xl p-8 text-white relative overflow-hidden shadow-lg shadow-blue-200">
                         <div class="relative z-10">
                             <h2 class="text-2xl font-black mb-2">Selamat Datang di SIOMAS PRO!</h2>
@@ -110,7 +109,7 @@
                         </div>
                         <i data-lucide="droplet" class="absolute -right-8 -bottom-8 w-32 h-32 md:w-48 md:h-48 text-blue-500 opacity-20 rotate-12"></i>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-8">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-8 mt-6">
                         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center">
                             <div class="bg-blue-100 p-4 rounded-xl text-blue-600 mr-4"><i data-lucide="users"></i></div>
                             <div>
@@ -325,8 +324,8 @@
         
         let globalDataPelanggan = []; 
         let globalBelumInput = []; 
-        let globalDataTagihan = []; // Untuk nota
-        let globalDataRekap = []; // Untuk cetak rekap tabel besar
+        let globalDataTagihan = []; 
+        let globalDataRekap = []; 
 
         lucide.createIcons();
 
@@ -381,7 +380,6 @@
                     selFilter.innerHTML = '<option value="">-- Pilih Periode --</option>';
                     selRekapBulan.innerHTML = '<option value="">-- Pilih Bulan --</option>';
                     
-                    // Filter tahun dari string "Bulan Tahun" (misal ambil "2026" dari "Mei 2026")
                     let arrTahun = [];
                     
                     arrPeriode.forEach(sheetName => {
@@ -459,9 +457,6 @@
             } catch (err) {}
         }
 
-        // ==========================================
-        // FITUR REKAP LAPORAN (BESAR UNTUK PRINT 50+)
-        // ==========================================
         function gantiTipeRekap() {
             const t = document.getElementById('rekap-tipe').value;
             if(t === 'bulan') {
@@ -521,7 +516,7 @@
                         `;
                     });
                     document.getElementById('rekap-total-rp').innerText = formatRp(total);
-                    document.getElementById('btn-print-rekap').classList.remove('hidden'); // Munculkan tombol print
+                    document.getElementById('btn-print-rekap').classList.remove('hidden'); 
                     Swal.close();
                 }
             } catch (e) {
@@ -530,6 +525,9 @@
             }
         }
 
+        // ==========================================
+        // PERUBAHAN UTAMA: FUNGSI CETAK PDF REKAP
+        // ==========================================
         function cetakPDFRekap() {
             const tipe = document.getElementById('rekap-tipe').value;
             const filter = tipe === 'bulan' ? document.getElementById('rekap-val-bulan').value : document.getElementById('rekap-val-tahun').value;
@@ -539,15 +537,17 @@
             
             globalDataRekap.forEach((x, i) => {
                 total += parseInt(x.total);
-                let st = (x.status === true || x.status === "TRUE") ? "Lunas" : "Belum Bayar";
+                // Status sengaja dikosongkan agar mudah dicentang manual
                 rowsHtml += `
                     <tr>
                         <td style="text-align:center;">${i+1}</td>
                         <td><b>${x.nama}</b><br><span style="font-size:11pt; color:#555;">ID: ${x.id}</span></td>
                         <td style="text-align:center;">${x.periode || filter}</td>
+                        <td style="text-align:center;">${x.meterAwal}</td>
+                        <td style="text-align:center;">${x.meterAkhir}</td>
                         <td style="text-align:center;">${x.pemakaian}</td>
                         <td style="text-align:right;">${formatRp(x.total)}</td>
-                        <td style="text-align:center;">${st}</td>
+                        <td style="text-align:center;"></td>
                     </tr>
                 `;
             });
@@ -563,11 +563,13 @@
                     <thead>
                         <tr>
                             <th width="5%">No</th>
-                            <th width="30%">Nama Warga</th>
-                            <th width="15%">Bulan</th>
+                            <th width="22%">Nama Warga</th>
+                            <th width="13%">Bulan</th>
+                            <th width="10%">M. Awal</th>
+                            <th width="10%">M. Akhir</th>
                             <th width="10%">Pakai (m³)</th>
-                            <th width="20%">Tagihan (Rp)</th>
-                            <th width="20%">Status</th>
+                            <th width="15%">Tagihan (Rp)</th>
+                            <th width="15%">Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -575,7 +577,7 @@
                     </tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="4" style="text-align:right; font-weight:bold;">TOTAL PENDAPATAN :</td>
+                            <td colspan="6" style="text-align:right; font-weight:bold;">TOTAL PENDAPATAN :</td>
                             <td colspan="2" style="font-weight:bold; font-size:16pt;">${formatRp(total)}</td>
                         </tr>
                     </tfoot>
@@ -592,9 +594,6 @@
             window.print();
         }
 
-        // ==========================================
-        // SISA FUNGSI SEPERTI NOTA & CRUD SAMA SAJA
-        // ==========================================
         async function loadDataTagihan() {
             const periode = document.getElementById('filter-periode').value;
             const tbody = document.getElementById('tabel-tagihan');
