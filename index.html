@@ -37,12 +37,20 @@
             .rekap-header h2 { font-size: 20pt; font-weight: bold; margin: 0; text-transform: uppercase; }
             .rekap-header p { font-size: 14pt; margin: 5px 0; }
             
-            .rekap-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 14pt; } /* FONT BESAR 14pt */
+            .rekap-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 14pt; } /* FONT BESAR 14pt */
             .rekap-table th, .rekap-table td { border: 1px solid black; padding: 10px; text-align: left; }
             .rekap-table th { background-color: #f0f0f0 !important; -webkit-print-color-adjust: exact; text-align: center; }
-            .rekap-table tr { page-break-inside: avoid; } /* Agar baris tidak terpotong di tengah halaman */
+            .rekap-table tr { page-break-inside: avoid; break-inside: avoid; } /* Agar baris tidak terpotong di tengah halaman */
+            .rekap-table thead { display: table-header-group; } /* Header kolom boleh muncul lagi di halaman berikutnya */
+            .rekap-table tbody { display: table-row-group; }
+
+            /* Total dipisah dari <tfoot> agar TIDAK diulang browser di setiap halaman */
+            .rekap-total-table { width: 100%; border-collapse: collapse; margin-top: 0; font-size: 14pt; page-break-inside: avoid; break-inside: avoid; }
+            .rekap-total-table td { border: 1px solid black; padding: 10px; font-weight: bold; }
+            .rekap-total-label { width: 70%; text-align: right !important; }
+            .rekap-total-value { width: 30%; font-size: 16pt; }
             
-            .rekap-ttd { width: 100%; margin-top: 30px; font-size: 14pt; display: flex; justify-content: flex-end; }
+            .rekap-ttd { width: 100%; margin-top: 30px; font-size: 14pt; display: flex; justify-content: flex-end; page-break-inside: avoid; break-inside: avoid; }
             .rekap-ttd-box { text-align: center; width: 250px; }
         }
     </style>
@@ -573,13 +581,17 @@
                     <tbody>
                         ${rowsHtml}
                     </tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="4" style="text-align:right; font-weight:bold;">TOTAL PENDAPATAN :</td>
-                            <td colspan="2" style="font-weight:bold; font-size:16pt;">${formatRp(total)}</td>
-                        </tr>
-                    </tfoot>
                 </table>
+
+                <!-- Total sengaja DI LUAR tabel data. Jika diletakkan di <tfoot>,
+                     Chrome/Brave dapat mengulanginya sebagai footer pada setiap halaman. -->
+                <table class="rekap-total-table">
+                    <tr>
+                        <td class="rekap-total-label">TOTAL PENDAPATAN :</td>
+                        <td class="rekap-total-value">${formatRp(total)}</td>
+                    </tr>
+                </table>
+
                 <div class="rekap-ttd">
                     <div class="rekap-ttd-box">
                         <p style="margin-bottom: 70px;">Mengetahui,<br>Petugas Pamsimas,</p>
