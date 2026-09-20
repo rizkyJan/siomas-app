@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIOMAS PRO | TIRTA GIANTI </title>
+    <title>SIOMAS PRO | Dashboard Serverless</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -15,54 +15,32 @@
         .section-active { display: block; animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* === CSS KHUSUS PRINT (ANTI TERPOTONG & ANTI HEADER LINK) === */
+        /* === CSS KHUSUS PRINT === */
         @media print {
-            /* Set margin 0 untuk menghilangkan Header Link & Footer dari Browser */
-            @page { size: A4 portrait; margin: 0 !important; }
-            
-            body { background-color: white !important; margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            @page { size: A4 portrait; margin: 1cm; }
+            body { background-color: white !important; margin: 0; padding: 0; }
             #app-container { display: none !important; } 
             #print-area { display: block !important; width: 100%; color: black !important; } 
             
-            /* 1. Style Khusus Nota (Pasti 4 Per Halaman) */
-            .print-page { 
-                width: 210mm; /* Ukuran lebar A4 */
-                height: 296mm; /* Ukuran tinggi A4 */
-                padding: 10mm; /* Margin buatan sebagai ganti margin bawaan browser */
-                box-sizing: border-box;
-                display: flex; 
-                flex-wrap: wrap; 
-                justify-content: space-between; 
-                align-content: flex-start;
-                page-break-after: always; /* Pasti ganti halaman tiap 4 nota */
-                break-after: page;
-            }
-            .print-page:last-child {
-                page-break-after: auto;
-                break-after: auto;
-            }
+            /* 1. Style Khusus Nota 1/4 Kertas */
+            .print-grid { display: flex; flex-wrap: wrap; justify-content: space-between; align-content: flex-start; }
             .nota-card {
-                width: 48%; 
-                height: 130mm; /* Tinggi pas agar 2 baris muat 1 halaman tanpa terdorong */
-                box-sizing: border-box;
-                border: 1.5px dashed black !important; 
-                padding: 5mm !important; 
-                margin-bottom: 6mm;
+                width: 48%; height: 13.5cm; box-sizing: border-box;
+                border: 1.5px dashed black !important; padding: 0.5cm !important; margin-bottom: 0.5cm;
                 page-break-inside: avoid;
-                break-inside: avoid;
             }
             .nota-card * { color: black !important; background: white !important; border-color: black !important; }
             
-            /* 2. Style Khusus Tabel Rekap (Diberi padding karena margin kertas kita 0) */
-            .rekap-container { width: 100%; font-family: 'Times New Roman', serif; padding: 10mm; box-sizing: border-box; }
+            /* 2. Style Khusus Tabel Rekap (FONT BESAR UNTUK LANSIA 50+) */
+            .rekap-container { width: 100%; font-family: 'Times New Roman', serif; }
             .rekap-header { text-align: center; margin-bottom: 20px; border-bottom: 3px solid black; padding-bottom: 10px; }
             .rekap-header h2 { font-size: 20pt; font-weight: bold; margin: 0; text-transform: uppercase; }
             .rekap-header p { font-size: 14pt; margin: 5px 0; }
             
-            .rekap-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 14pt; } 
+            .rekap-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 14pt; } /* FONT BESAR 14pt */
             .rekap-table th, .rekap-table td { border: 1px solid black; padding: 10px; text-align: left; }
             .rekap-table th { background-color: #f0f0f0 !important; -webkit-print-color-adjust: exact; text-align: center; }
-            .rekap-table tr { page-break-inside: avoid; break-inside: avoid;} 
+            .rekap-table tr { page-break-inside: avoid; } /* Agar baris tidak terpotong di tengah halaman */
             
             .rekap-ttd { width: 100%; margin-top: 30px; font-size: 14pt; display: flex; justify-content: flex-end; }
             .rekap-ttd-box { text-align: center; width: 250px; }
@@ -124,6 +102,7 @@
             <div class="p-4 md:p-8">
 
                 <section id="section-dashboard" class="section-content section-active">
+		    
                     <div class="bg-blue-600 rounded-2xl p-8 text-white relative overflow-hidden shadow-lg shadow-blue-200">
                         <div class="relative z-10">
                             <h2 class="text-2xl font-black mb-2">Selamat Datang di SIOMAS PRO!</h2>
@@ -131,7 +110,7 @@
                         </div>
                         <i data-lucide="droplet" class="absolute -right-8 -bottom-8 w-32 h-32 md:w-48 md:h-48 text-blue-500 opacity-20 rotate-12"></i>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-8 mt-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-8">
                         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center">
                             <div class="bg-blue-100 p-4 rounded-xl text-blue-600 mr-4"><i data-lucide="users"></i></div>
                             <div>
@@ -149,7 +128,7 @@
                         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center">
                             <div class="bg-orange-100 p-4 rounded-xl text-orange-600 mr-4"><i data-lucide="wallet"></i></div>
                             <div>
-                                <p class="text-sm text-gray-500 font-medium">Biaya Beban/Admin</p>
+                                <p class="text-sm text-gray-500 font-medium">Biaya Admin</p>
                                 <h3 class="text-2xl font-bold">Rp 5.000</h3>
                             </div>
                         </div>
@@ -185,9 +164,6 @@
                                 </div>
                             </div>
                             <button onclick="handleInput()" id="btn-save" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-all">Simpan Tagihan</button>
-
-                            <!-- Notifikasi detail tagihan terakhir yang baru berhasil disimpan -->
-                            <div id="notif-tagihan-terakhir" class="hidden mt-4 p-5 rounded-xl border border-green-200 bg-green-50 text-green-800 shadow-sm"></div>
                         </div>
                     </div>
                 </section>
@@ -200,7 +176,7 @@
                                 <div class="flex gap-2">
                                     <select id="filter-periode" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 font-semibold"></select>
                                     <button onclick="loadDataTagihan()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700" title="Cari Data"><i data-lucide="search" class="w-5 h-5"></i></button>
-                                    <button onclick="cetakSemuaNota()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 flex items-center gap-2 whitespace-nowrap" title="Cetak Semua Nota (A4)"><i data-lucide="printer" class="w-5 h-5"></i> <span class="hidden md:inline font-semibold">Cetak Semua Nota</span></button>
+                                    <button onclick="cetakSemuaNota()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 flex items-center gap-2 whitespace-nowrap" title="Cetak Semua Nota Thermal 58mm"><i data-lucide="printer" class="w-5 h-5"></i> <span class="hidden md:inline font-semibold">Cetak Semua Nota</span></button>
                                 </div>
                             </div>
                         </div>
@@ -248,8 +224,7 @@
                                 </div>
                                 <div class="flex gap-2">
                                     <button onclick="tarikDataRekap()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 font-semibold whitespace-nowrap">Tarik Data</button>
-                                    <button onclick="cetakPDFRekap('admin')" id="btn-print-admin" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 font-bold flex items-center gap-2 hidden whitespace-nowrap"><i data-lucide="file-text" class="w-4 h-4"></i> Cetak Admin</button>
-                                    <button onclick="cetakPDFRekap('pelanggan')" id="btn-print-pelanggan" class="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 font-bold flex items-center gap-2 hidden whitespace-nowrap"><i data-lucide="file-text" class="w-4 h-4"></i> Cetak Pelanggan</button>
+                                    <button onclick="cetakPDFRekap()" id="btn-print-rekap" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 font-bold flex items-center gap-2 hidden"><i data-lucide="file-text" class="w-5 h-5"></i> Cetak PDF</button>
                                 </div>
                             </div>
                         </div>
@@ -261,17 +236,16 @@
                                         <th class="p-3 font-bold text-center">Bulan</th>
                                         <th class="p-3 font-bold">Nama Warga</th>
                                         <th class="p-3 font-bold text-center">Pakai (m³)</th>
-                                        <th class="p-3 font-bold text-right">Beban</th>
                                         <th class="p-3 font-bold text-right">Total Tagihan</th>
                                         <th class="p-3 font-bold text-center">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabel-rekap-preview" class="text-sm divide-y divide-gray-100">
-                                    <tr><td colspan="6" class="p-6 text-center text-gray-500">Klik "Tarik Data" untuk menampilkan rekap</td></tr>
+                                    <tr><td colspan="5" class="p-6 text-center text-gray-500">Klik "Tarik Data" untuk menampilkan rekap</td></tr>
                                 </tbody>
                                 <tfoot>
                                     <tr class="bg-gray-100 border-t-2 border-gray-300">
-                                        <td colspan="4" class="p-3 text-right font-black uppercase text-gray-700">Total Pendapatan:</td>
+                                        <td colspan="3" class="p-3 text-right font-black uppercase text-gray-700">Total Pendapatan:</td>
                                         <td id="rekap-total-rp" colspan="2" class="p-3 font-black text-green-700 text-lg">Rp 0</td>
                                     </tr>
                                 </tfoot>
@@ -351,8 +325,8 @@
         
         let globalDataPelanggan = []; 
         let globalBelumInput = []; 
-        let globalDataTagihan = []; 
-        let globalDataRekap = []; 
+        let globalDataTagihan = []; // Untuk nota
+        let globalDataRekap = []; // Untuk cetak rekap tabel besar
 
         lucide.createIcons();
 
@@ -407,6 +381,7 @@
                     selFilter.innerHTML = '<option value="">-- Pilih Periode --</option>';
                     selRekapBulan.innerHTML = '<option value="">-- Pilih Bulan --</option>';
                     
+                    // Filter tahun dari string "Bulan Tahun" (misal ambil "2026" dari "Mei 2026")
                     let arrTahun = [];
                     
                     arrPeriode.forEach(sheetName => {
@@ -445,7 +420,6 @@
                     if (res.data.length === 0) {
                         selId.innerHTML = '<option value="">🎉 Semua warga bulan ini sudah dicatat!</option>';
                         document.getElementById("btn-save").disabled = true;
-                        globalBelumInput = [];
                     } else {
                         globalBelumInput = res.data; 
                         selId.innerHTML = `<option value="">-- Pilih Warga -- (${res.data.length} tersisa)</option>`;
@@ -465,61 +439,6 @@
             if (u) disp.value = u.meterAwal;
         }
 
-        function tampilkanNotifTagihan(data) {
-            const box = document.getElementById('notif-tagihan-terakhir');
-            if (!box) return;
-
-            box.innerHTML = `
-                <div class="flex items-start gap-3">
-                    <div class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-black shrink-0">✓</div>
-                    <div class="flex-1">
-                        <h4 class="font-black text-green-800 text-lg mb-1">Tagihan Berhasil Dimasukkan</h4>
-                        <p class="text-sm mb-3 leading-relaxed">
-                            Anda berhasil memasukkan tagihan pelanggan
-                            <b>${data.nama}</b> dengan nilai awal <b>${data.meterAwal} m³</b>,
-                            nilai akhir <b>${data.meterAkhir} m³</b>, jumlah pemakaian
-                            <b>${data.pemakaian} m³</b>, dan total tagihan <b>${formatRp(data.total)}</b>.
-                        </p>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                            <div class="bg-white rounded-lg p-3 border border-green-100">
-                                <p class="text-gray-500 text-xs font-semibold">Periode</p>
-                                <p class="font-black text-gray-800">${data.periode}</p>
-                            </div>
-                            <div class="bg-white rounded-lg p-3 border border-green-100">
-                                <p class="text-gray-500 text-xs font-semibold">Nama Pelanggan</p>
-                                <p class="font-black text-gray-800">${data.nama}</p>
-                            </div>
-                            <div class="bg-white rounded-lg p-3 border border-green-100">
-                                <p class="text-gray-500 text-xs font-semibold">Meter Awal</p>
-                                <p class="font-black text-gray-800">${data.meterAwal} m³</p>
-                            </div>
-                            <div class="bg-white rounded-lg p-3 border border-green-100">
-                                <p class="text-gray-500 text-xs font-semibold">Meter Akhir</p>
-                                <p class="font-black text-blue-700">${data.meterAkhir} m³</p>
-                            </div>
-                            <div class="bg-white rounded-lg p-3 border border-green-100">
-                                <p class="text-gray-500 text-xs font-semibold">Jumlah Pemakaian</p>
-                                <p class="font-black text-gray-800">${data.pemakaian} m³</p>
-                            </div>
-                            <div class="bg-white rounded-lg p-3 border border-green-100">
-                                <p class="text-gray-500 text-xs font-semibold">Total Tagihan</p>
-                                <p class="font-black text-green-700">${formatRp(data.total)}</p>
-                            </div>
-                        </div>
-
-                        <div class="mt-3 text-xs text-gray-600 leading-relaxed">
-                            Rincian: biaya air ${data.pemakaian} × Rp 1.000 = <b>${formatRp(data.biayaAir)}</b>,
-                            ditambah beban/admin <b>${formatRp(data.beban)}</b>.
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            box.classList.remove('hidden');
-            box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-
         async function handleInput() {
             const periode = document.getElementById('inp-periode').value;
             const id = document.getElementById('inp-id').value;
@@ -527,63 +446,22 @@
             const mAwal = document.getElementById('disp-meter-awal').value;
 
             if(!periode || !id || !mAkhir) return Swal.fire('Oops!', 'Lengkapi form tagihan.', 'warning');
-
-            const meterAwalAngka = parseInt(mAwal);
-            const meterAkhirAngka = parseInt(mAkhir);
-
-            if(isNaN(meterAwalAngka) || isNaN(meterAkhirAngka)) {
-                return Swal.fire('Oops!', 'Meteran awal dan akhir harus berupa angka.', 'warning');
-            }
-
-            if(meterAkhirAngka < meterAwalAngka) {
-                return Swal.fire({ icon: 'error', title: 'Input Tidak Valid!', text: `Meter akhir tidak boleh lebih kecil dari meter awal.` });
-            }
-
-            const pelanggan = globalBelumInput.find(p => p.id === id);
-            const namaPelanggan = pelanggan ? pelanggan.nama : id;
-            const pemakaian = meterAkhirAngka - meterAwalAngka;
-            const biayaAir = pemakaian * 1000;
-            const beban = 5000;
-            const total = biayaAir + beban;
+            if(parseInt(mAkhir) < parseInt(mAwal)) return Swal.fire({ icon: 'error', title: 'Input Tidak Valid!', text: `Meter akhir tidak boleh lebih kecil dari meter awal.` });
 
             Swal.fire({ title: 'Menyimpan...', didOpen: () => Swal.showLoading() });
             try {
-                const res = await fetch(URL_API, {
-                    method: "POST",
-                    body: JSON.stringify({
-                        action: "inputMeter",
-                        namaPeriode: periode,
-                        idPelanggan: id,
-                        meterAkhir: meterAkhirAngka
-                    })
-                }).then(r=>r.json());
-
+                const res = await fetch(URL_API, { method: "POST", body: JSON.stringify({ action: "inputMeter", namaPeriode: periode, idPelanggan: id, meterAkhir: parseInt(mAkhir) }) }).then(r=>r.json());
                 if(res.status === "success") {
-                    Swal.fire({ title: 'Sukses!', text: res.pesan, icon: 'success', timer: 1200, showConfirmButton: false });
-
-                    tampilkanNotifTagihan({
-                        periode: periode,
-                        id: id,
-                        nama: namaPelanggan,
-                        meterAwal: meterAwalAngka,
-                        meterAkhir: meterAkhirAngka,
-                        pemakaian: pemakaian,
-                        biayaAir: biayaAir,
-                        beban: beban,
-                        total: total
-                    });
-
+                    Swal.fire({ title: 'Sukses!', text: res.pesan, icon: 'success', timer: 1500, showConfirmButton: false });
                     document.getElementById('inp-meter').value = "";
-                    loadPelangganBelumInput();
-                    loadDataTagihan();
-                } else {
-                    Swal.fire('Gagal', res.pesan, 'error');
-                }
-            } catch (err) {
-                Swal.fire('Error', 'Gagal menyimpan tagihan.', 'error');
-            }
+                    loadPelangganBelumInput(); loadDataTagihan(); 
+                } else Swal.fire('Gagal', res.pesan, 'error');
+            } catch (err) {}
         }
 
+        // ==========================================
+        // FITUR REKAP LAPORAN (BESAR UNTUK PRINT 50+)
+        // ==========================================
         function gantiTipeRekap() {
             const t = document.getElementById('rekap-tipe').value;
             if(t === 'bulan') {
@@ -604,10 +482,8 @@
             if(!filter) return Swal.fire('Oops', 'Pilih filter periode/tahun dulu.', 'warning');
 
             const tbody = document.getElementById('tabel-rekap-preview');
-            tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-blue-500 font-bold animate-pulse">Menarik data dari server...</td></tr>';
-            
-            document.getElementById('btn-print-admin').classList.add('hidden');
-            document.getElementById('btn-print-pelanggan').classList.add('hidden');
+            tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-blue-500 font-bold animate-pulse">Menarik data dari server...</td></tr>';
+            document.getElementById('btn-print-rekap').classList.add('hidden');
             
             Swal.fire({ title: 'Merekap Data...', didOpen: () => Swal.showLoading() });
 
@@ -625,7 +501,7 @@
                     tbody.innerHTML = "";
                     
                     if(res.data.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-gray-500">Tidak ada data di periode ini.</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-500">Tidak ada data di periode ini.</td></tr>';
                         document.getElementById('rekap-total-rp').innerText = "Rp 0";
                         Swal.close();
                         return;
@@ -639,26 +515,22 @@
                                 <td class="p-3 text-center font-medium">${x.periode || filter}</td>
                                 <td class="p-3 font-bold">${x.nama} <br><span class="text-xs text-gray-400 font-normal">${x.id}</span></td>
                                 <td class="p-3 text-center">${x.pemakaian}</td>
-                                <td class="p-3 text-right text-gray-600">Rp 5.000</td>
                                 <td class="p-3 text-right font-bold text-green-700">${formatRp(x.total)}</td>
                                 <td class="p-3 text-center">${st}</td>
                             </tr>
                         `;
                     });
                     document.getElementById('rekap-total-rp').innerText = formatRp(total);
-                    
-                    document.getElementById('btn-print-admin').classList.remove('hidden'); 
-                    document.getElementById('btn-print-pelanggan').classList.remove('hidden'); 
+                    document.getElementById('btn-print-rekap').classList.remove('hidden'); // Munculkan tombol print
                     Swal.close();
                 }
             } catch (e) {
                 Swal.fire('Error', 'Gagal memuat rekap', 'error');
-                tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-red-500">Error!</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-red-500">Error!</td></tr>';
             }
         }
 
-        // FUNGSI CETAK REKAP DENGAN PEMBAGIAN BERDASARKAN HALAMAN MOBILE (PER 4 NOTA) UNTUK KEAMANAN
-        function cetakPDFRekap(tipeCetak) {
+        function cetakPDFRekap() {
             const tipe = document.getElementById('rekap-tipe').value;
             const filter = tipe === 'bulan' ? document.getElementById('rekap-val-bulan').value : document.getElementById('rekap-val-tahun').value;
             
@@ -667,63 +539,46 @@
             
             globalDataRekap.forEach((x, i) => {
                 total += parseInt(x.total);
-                // Status sengaja dikosongkan agar mudah dicentang manual pakai pulpen
+                let st = (x.status === true || x.status === "TRUE") ? "Lunas" : "Belum Bayar";
                 rowsHtml += `
                     <tr>
                         <td style="text-align:center;">${i+1}</td>
                         <td><b>${x.nama}</b><br><span style="font-size:11pt; color:#555;">ID: ${x.id}</span></td>
                         <td style="text-align:center;">${x.periode || filter}</td>
-                        <td style="text-align:center;">${x.meterAwal}</td>
-                        <td style="text-align:center;">${x.meterAkhir}</td>
                         <td style="text-align:center;">${x.pemakaian}</td>
-                        <td style="text-align:right;">Rp 5.000</td>
                         <td style="text-align:right;">${formatRp(x.total)}</td>
-                        <td style="text-align:center;"></td>
+                        <td style="text-align:center;">${st}</td>
                     </tr>
                 `;
             });
-
-            // Tentukan Judul dan Footer berdasarkan Tipe Cetak
-            let judulLap = tipeCetak === 'admin' ? "LAPORAN REKAPITULASI (ADMIN)" : "LAPORAN REKAPITULASI TAGIHAN AIR";
-            
-            let footerHtml = '';
-            // Hanya munculkan Total Pendapatan jika yang dicetak adalah versi Admin
-            if(tipeCetak === 'admin') {
-                footerHtml = `
-                    <tfoot>
-                        <tr>
-                            <td colspan="7" style="text-align:right; font-weight:bold;">TOTAL PENDAPATAN :</td>
-                            <td colspan="2" style="font-weight:bold; font-size:16pt;">${formatRp(total)}</td>
-                        </tr>
-                    </tfoot>
-                `;
-            }
 
             // Template HTML Khusus Print Rekap (FONT 14pt)
             let htmlPrint = `
             <div class="rekap-container">
                 <div class="rekap-header">
-                    <h2>${judulLap}</h2>
+                    <h2>LAPORAN REKAPITULASI TAGIHAN AIR</h2>
                     <p><b>PAMSIMAS</b> - Periode: ${filter}</p>
                 </div>
                 <table class="rekap-table">
                     <thead>
                         <tr>
                             <th width="5%">No</th>
-                            <th width="20%">Nama Warga</th>
-                            <th width="12%">Bulan</th>
-                            <th width="10%">M. Awal</th>
-                            <th width="10%">M. Akhir</th>
-                            <th width="8%">Pakai</th>
-                            <th width="10%">Beban</th>
-                            <th width="15%">Tagihan (Rp)</th>
-                            <th width="10%">Status</th>
+                            <th width="30%">Nama Warga</th>
+                            <th width="15%">Bulan</th>
+                            <th width="10%">Pakai (m³)</th>
+                            <th width="20%">Tagihan (Rp)</th>
+                            <th width="20%">Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${rowsHtml}
                     </tbody>
-                    ${footerHtml}
+                    <tfoot>
+                        <tr>
+                            <td colspan="4" style="text-align:right; font-weight:bold;">TOTAL PENDAPATAN :</td>
+                            <td colspan="2" style="font-weight:bold; font-size:16pt;">${formatRp(total)}</td>
+                        </tr>
+                    </tfoot>
                 </table>
                 <div class="rekap-ttd">
                     <div class="rekap-ttd-box">
@@ -737,6 +592,9 @@
             window.print();
         }
 
+        // ==========================================
+        // SISA FUNGSI SEPERTI NOTA & CRUD SAMA SAJA
+        // ==========================================
         async function loadDataTagihan() {
             const periode = document.getElementById('filter-periode').value;
             const tbody = document.getElementById('tabel-tagihan');
@@ -758,35 +616,244 @@
             } catch (e) {}
         }
 
-        function generateHTMLNota(p, periode) {
-            return `<div class="nota-card flex flex-col justify-between"><div><div class="text-center border-b-2 border-black pb-2 mb-3"><h2 class="font-black text-xl tracking-wide uppercase m-0">NOTA TAGIHAN AIR</h2><p class="font-bold text-base m-0">PAMSIMAS</p></div><div class="flex justify-between font-bold text-sm mb-3 border border-black p-1"><span>ID: ${p.id}</span><span>Bulan: ${periode}</span></div><div class="mb-3"><p class="text-xs font-bold mb-0">Diberikan Kepada:</p><p class="text-lg font-black uppercase">${p.nama}</p></div><table class="w-full text-sm font-medium mb-3"><tr class="border-b border-black"><td class="py-1">Meter Awal</td><td class="px-1">:</td><td class="text-right">${p.meterAwal} m³</td></tr><tr class="border-b border-black"><td class="py-1">Meter Akhir</td><td class="px-1">:</td><td class="text-right">${p.meterAkhir} m³</td></tr><tr class="border-b-2 border-black border-dashed"><td class="py-1 font-bold">Total Pemakaian</td><td class="px-1">:</td><td class="text-right font-black text-base">${p.pemakaian} m³</td></tr><tr><td class="py-1 mt-1">Tarif Air (${p.pemakaian} x Rp 1.000)</td><td class="px-1 mt-1">:</td><td class="text-right mt-1">${formatRp(p.pemakaian * 1000)}</td></tr><tr class="border-b-2 border-black"><td class="py-1 mb-1">Biaya Beban/Admin</td><td class="px-1 mb-1">:</td><td class="text-right mb-1">Rp 5.000</td></tr><tr class="font-black text-lg border-b-2 border-black"><td class="py-2">TOTAL BAYAR</td><td class="py-2">:</td><td class="text-right py-2">${formatRp(p.total)}</td></tr></table></div><div class="flex justify-between items-end mt-2"><div class="text-[10px] italic"><p>* Harap simpan nota ini</p><p>* sebagai bukti pembayaran sah.</p></div><div class="text-center"><p class="mb-8 font-semibold text-xs">Petugas,</p><p class="font-black underline text-sm">Mujiyono</p></div></div></div>`;
+        // ==========================================
+        // CETAK NOTA THERMAL 58MM
+        // Tidak mengubah API/GAS dan tidak mengganggu cetak rekap A4.
+        // ==========================================
+        function escapeHTML(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
         }
 
-        // FUNGSI CETAK SEMUA NOTA (DIPERBARUI UNTUK MOBILE)
+        function formatRpThermal(angka) {
+            return 'Rp ' + Number(angka || 0).toLocaleString('id-ID');
+        }
+
+        function generateHTMLNota(p, periode) {
+            const pemakaian = Number(p.pemakaian || 0);
+            const biayaAir = pemakaian * 1000;
+            const admin = Number(p.total || 0) - biayaAir;
+
+            return `
+                <section class="thermal-receipt">
+                    <div class="receipt-center receipt-head">
+                        <div class="receipt-brand">PAMSIMAS</div>
+                        <div class="receipt-title">NOTA TAGIHAN AIR</div>
+                    </div>
+
+                    <div class="receipt-dash"></div>
+
+                    <table class="receipt-info">
+                        <tr><td>Periode</td><td>:</td><td>${escapeHTML(periode)}</td></tr>
+                        <tr><td>ID</td><td>:</td><td>${escapeHTML(p.id)}</td></tr>
+                        <tr><td>Nama</td><td>:</td><td class="receipt-name">${escapeHTML(p.nama)}</td></tr>
+                    </table>
+
+                    <div class="receipt-dash"></div>
+
+                    <table class="receipt-info receipt-meter">
+                        <tr><td>Meter Awal</td><td>:</td><td class="receipt-right">${escapeHTML(p.meterAwal)} m3</td></tr>
+                        <tr><td>Meter Akhir</td><td>:</td><td class="receipt-right">${escapeHTML(p.meterAkhir)} m3</td></tr>
+                        <tr><td>Pemakaian</td><td>:</td><td class="receipt-right receipt-bold">${escapeHTML(p.pemakaian)} m3</td></tr>
+                    </table>
+
+                    <div class="receipt-dash"></div>
+
+                    <div class="receipt-row"><span>Biaya Air</span><span>${formatRpThermal(biayaAir)}</span></div>
+                    <div class="receipt-row"><span>Admin</span><span>${formatRpThermal(admin)}</span></div>
+
+                    <div class="receipt-dash"></div>
+
+                    <div class="receipt-row receipt-total">
+                        <span>TOTAL</span>
+                        <span>${formatRpThermal(p.total)}</span>
+                    </div>
+                    <div class="receipt-dash"></div>
+
+                    <div class="receipt-center receipt-footer">
+                        Terima kasih<br>
+                        Harap simpan nota ini sebagai<br>
+                        bukti tagihan/pembayaran.<br><br>
+                        Petugas: Mujiyono
+                    </div>
+                </section>`;
+        }
+
+        function bukaJendelaPrintThermal(isiNota, judul = 'Cetak Nota PAMSIMAS') {
+            const printWindow = window.open('', '_blank', 'width=420,height=720');
+
+            if (!printWindow) {
+                Swal.fire('Popup diblokir', 'Izinkan popup browser agar nota dapat dicetak.', 'warning');
+                return;
+            }
+
+            printWindow.document.open();
+            printWindow.document.write(`<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${escapeHTML(judul)}</title>
+    <style>
+        @page {
+            size: 58mm auto;
+            margin: 0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 58mm;
+            margin: 0;
+            padding: 0;
+            background: #fff;
+            color: #000;
+        }
+
+        body {
+            font-family: "Courier New", Courier, monospace;
+            font-size: 10px;
+            line-height: 1.3;
+        }
+
+        .thermal-receipt {
+            width: 48mm;
+            margin: 0 auto;
+            padding: 3mm 1mm 4mm;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            page-break-after: always;
+            break-after: page;
+        }
+
+        .thermal-receipt:last-child {
+            page-break-after: auto;
+            break-after: auto;
+        }
+
+        .receipt-center { text-align: center; }
+        .receipt-right { text-align: right; }
+        .receipt-bold { font-weight: 700; }
+
+        .receipt-brand {
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: .5px;
+        }
+
+        .receipt-title {
+            font-size: 11px;
+            font-weight: 700;
+            margin-top: 1px;
+        }
+
+        .receipt-dash {
+            border-top: 1px dashed #000;
+            margin: 5px 0;
+        }
+
+        .receipt-info {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        .receipt-info td {
+            padding: 1px 0;
+            vertical-align: top;
+            overflow-wrap: anywhere;
+        }
+
+        .receipt-info td:nth-child(1) { width: 34%; }
+        .receipt-info td:nth-child(2) { width: 5%; text-align: center; }
+        .receipt-info td:nth-child(3) { width: 61%; }
+        .receipt-name { font-weight: 700; text-transform: uppercase; }
+
+        .receipt-row {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            gap: 4px;
+            margin: 2px 0;
+        }
+
+        .receipt-total {
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .receipt-footer {
+            font-size: 9px;
+            margin-top: 6px;
+        }
+
+        @media screen {
+            body { margin: 0 auto; }
+            .thermal-receipt { border-bottom: 1px dashed #aaa; }
+        }
+
+        @media print {
+            html, body {
+                width: 58mm !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .thermal-receipt {
+                width: 48mm !important;
+                border: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    ${isiNota}
+    <script>
+        window.addEventListener('load', function () {
+            setTimeout(function () { window.print(); }, 250);
+        });
+        window.addEventListener('afterprint', function () {
+            window.close();
+        });
+    <\/script>
+</body>
+</html>`);
+            printWindow.document.close();
+        }
+
         function cetakSemuaNota() {
             const periode = document.getElementById('filter-periode').value;
-            if(!periode || globalDataTagihan.length === 0) return Swal.fire('Oops', 'Pilih periode yang ada datanya.', 'warning');
-            
-            let html = '';
-            // Loop per 4 nota agar dibuatkan "Page" khusus (mengakali margin HP)
-            for (let i = 0; i < globalDataTagihan.length; i += 4) {
-                html += '<div class="print-page">';
-                for (let j = 0; j < 4; j++) {
-                    if (globalDataTagihan[i + j]) {
-                        html += generateHTMLNota(globalDataTagihan[i + j], periode);
-                    }
-                }
-                html += '</div>';
+            if(!periode || globalDataTagihan.length === 0) {
+                return Swal.fire('Oops', 'Pilih periode yang ada datanya.', 'warning');
             }
-            
-            document.getElementById('print-area').innerHTML = html; 
-            window.print();
+
+            const semuaNota = globalDataTagihan
+                .map(p => generateHTMLNota(p, periode))
+                .join('');
+
+            bukaJendelaPrintThermal(
+                semuaNota,
+                `Semua Nota ${periode}`
+            );
         }
 
         function cetakNotaIndividu(id) {
             const periode = document.getElementById('filter-periode').value;
             const p = globalDataTagihan.find(x => x.id === id);
-            if(p) { document.getElementById('print-area').innerHTML = '<div class="print-page">' + generateHTMLNota(p, periode) + '</div>'; window.print(); }
+
+            if (!p) {
+                return Swal.fire('Data tidak ditemukan', 'Nota pelanggan tidak ditemukan.', 'error');
+            }
+
+            bukaJendelaPrintThermal(
+                generateHTMLNota(p, periode),
+                `Nota ${p.id} - ${p.nama}`
+            );
         }
 
         async function editTagihan(id, nama, meterAwal, meterAkhirLama) {
@@ -830,7 +897,7 @@
         function renderTabelPelanggan(arr) {
             const tbody = document.getElementById('tabel-pelanggan'); tbody.innerHTML = "";
             arr.forEach(p => {
-                tbody.innerHTML += `<tr class="hover:bg-gray-50"><td class="p-3 font-medium">${p.id}</td><td class="p-3">${p.nama}</td><td class="p-3 text-gray-500">${p.alamat}</td><td class="p-3 text-center"><span class="bg-gray-100 px-2 py-1 rounded text-xs font-bold">${p.meter} m³</span></td><td class="p-3 text-center whitespace-nowrap"><button onclick="editPelanggan('${p.id}')" class="p-1.5 bg-yellow-100 text-yellow-600 rounded hover:bg-yellow-200"><i data-lucide="edit-2" class="w-4 h-4"></i></button> <button onclick="hapusPelanggan('${p.id}', '${p.nama}')" class="p-1.5 bg-red-100 text-red-600 rounded hover:bg-red-200"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td></tr>`;
+                tbody.innerHTML += `<tr class="hover:bg-gray-50"><td class="p-3 font-medium">${p.id}</td><td class="p-3">${p.nama}</td><td class="p-3 text-gray-500">${p.alamat}</td><td class="p-3 text-center"><span class="bg-gray-100 px-2 py-1 rounded text-xs font-bold">${p.meter} m³</span></td><td class="p-3 text-center whitespace-nowrap"><button onclick="editPelanggan('${p.id}')" class="p-1.5 bg-yellow-100 text-yellow-600 rounded"><i data-lucide="edit-2" class="w-4 h-4"></i></button> <button onclick="hapusPelanggan('${p.id}', '${p.nama}')" class="p-1.5 bg-red-100 text-red-600 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td></tr>`;
             });
             lucide.createIcons();
         }
