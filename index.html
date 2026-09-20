@@ -17,40 +17,87 @@
         
         /* === CSS KHUSUS PRINT === */
         @media print {
-            @page { size: A4 portrait; margin: 1cm; }
+            /* Rekap dibuat landscape agar kolom meter dan rincian biaya tetap terbaca. */
+            @page { size: A4 landscape; margin: 10mm; }
             body { background-color: white !important; margin: 0; padding: 0; }
-            #app-container { display: none !important; } 
-            #print-area { display: block !important; width: 100%; color: black !important; } 
-            
-            /* 1. Style Khusus Nota 1/4 Kertas */
-            .print-grid { display: flex; flex-wrap: wrap; justify-content: space-between; align-content: flex-start; }
-            .nota-card {
-                width: 48%; height: 13.5cm; box-sizing: border-box;
-                border: 1.5px dashed black !important; padding: 0.5cm !important; margin-bottom: 0.5cm;
+            #app-container { display: none !important; }
+            #print-area { display: block !important; width: 100%; color: black !important; }
+
+            .rekap-container {
+                width: 100%;
+                font-family: 'Times New Roman', serif;
+                color: #000;
+            }
+            .rekap-header {
+                text-align: center;
+                margin-bottom: 12px;
+                border-bottom: 2px solid black;
+                padding-bottom: 8px;
+            }
+            .rekap-header h2 {
+                font-size: 18pt;
+                font-weight: bold;
+                margin: 0;
+                text-transform: uppercase;
+            }
+            .rekap-header p { font-size: 11pt; margin: 4px 0; }
+            .rekap-meta { font-size: 10pt !important; }
+
+            .rekap-table {
+                width: 100%;
+                border-collapse: collapse;
+                table-layout: fixed;
+                font-size: 10pt;
+                margin-bottom: 14px;
+            }
+            .rekap-table thead { display: table-header-group; }
+            .rekap-table tbody { display: table-row-group; }
+            .rekap-table th,
+            .rekap-table td {
+                border: 1px solid black;
+                padding: 5px 4px;
+                vertical-align: middle;
+            }
+            .rekap-table th {
+                background-color: #f0f0f0 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                text-align: center;
+                font-weight: bold;
+            }
+            .rekap-table tr {
+                break-inside: avoid;
                 page-break-inside: avoid;
             }
-            .nota-card * { color: black !important; background: white !important; border-color: black !important; }
-            
-            /* 2. Style Khusus Tabel Rekap (FONT BESAR UNTUK LANSIA 50+) */
-            .rekap-container { width: 100%; font-family: 'Times New Roman', serif; }
-            .rekap-header { text-align: center; margin-bottom: 20px; border-bottom: 3px solid black; padding-bottom: 10px; }
-            .rekap-header h2 { font-size: 20pt; font-weight: bold; margin: 0; text-transform: uppercase; }
-            .rekap-header p { font-size: 14pt; margin: 5px 0; }
-            
-            .rekap-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 14pt; } /* FONT BESAR 14pt */
-            .rekap-table th, .rekap-table td { border: 1px solid black; padding: 10px; text-align: left; }
-            .rekap-table th { background-color: #f0f0f0 !important; -webkit-print-color-adjust: exact; text-align: center; }
-            .rekap-table tr { page-break-inside: avoid; break-inside: avoid; } /* Agar baris tidak terpotong di tengah halaman */
-            .rekap-table thead { display: table-header-group; } /* Header kolom boleh muncul lagi di halaman berikutnya */
-            .rekap-table tbody { display: table-row-group; }
 
-            /* Total dipisah dari <tfoot> agar TIDAK diulang browser di setiap halaman */
-            .rekap-total-table { width: 100%; border-collapse: collapse; margin-top: 0; font-size: 14pt; page-break-inside: avoid; break-inside: avoid; }
-            .rekap-total-table td { border: 1px solid black; padding: 10px; font-weight: bold; }
-            .rekap-total-label { width: 70%; text-align: right !important; }
-            .rekap-total-value { width: 30%; font-size: 16pt; }
-            
-            .rekap-ttd { width: 100%; margin-top: 30px; font-size: 14pt; display: flex; justify-content: flex-end; page-break-inside: avoid; break-inside: avoid; }
+            /* Bukan tfoot, jadi tidak diulang pada setiap halaman. */
+            .rekap-summary {
+                width: 52%;
+                margin-left: auto;
+                border: 1.5px solid #000;
+                page-break-inside: avoid;
+                break-inside: avoid;
+                font-size: 11pt;
+            }
+            .rekap-summary-row {
+                display: flex;
+                justify-content: space-between;
+                gap: 12px;
+                padding: 5px 8px;
+                border-bottom: 1px solid #000;
+            }
+            .rekap-summary-row:last-child { border-bottom: 0; }
+            .rekap-summary-total { font-size: 13pt; font-weight: bold; }
+
+            .rekap-ttd {
+                width: 100%;
+                margin-top: 18px;
+                font-size: 11pt;
+                display: flex;
+                justify-content: flex-end;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
             .rekap-ttd-box { text-align: center; width: 250px; }
         }
     </style>
@@ -238,23 +285,26 @@
                         </div>
 
                         <div class="overflow-x-auto rounded-xl border border-gray-200">
-                            <table class="w-full text-left border-collapse">
+                            <table class="w-full min-w-[1050px] text-left border-collapse">
                                 <thead>
                                     <tr class="bg-blue-50 text-blue-800 text-sm border-b border-blue-200">
                                         <th class="p-3 font-bold text-center">Bulan</th>
                                         <th class="p-3 font-bold">Nama Warga</th>
+                                        <th class="p-3 font-bold text-center">Meter Awal</th>
+                                        <th class="p-3 font-bold text-center">Meter Akhir</th>
                                         <th class="p-3 font-bold text-center">Pakai (m³)</th>
+                                        <th class="p-3 font-bold text-right">Biaya Air</th>
+                                        <th class="p-3 font-bold text-right">Admin</th>
                                         <th class="p-3 font-bold text-right">Total Tagihan</th>
-                                        <th class="p-3 font-bold text-center">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabel-rekap-preview" class="text-sm divide-y divide-gray-100">
-                                    <tr><td colspan="5" class="p-6 text-center text-gray-500">Klik "Tarik Data" untuk menampilkan rekap</td></tr>
+                                    <tr><td colspan="8" class="p-6 text-center text-gray-500">Klik "Tarik Data" untuk menampilkan rekap</td></tr>
                                 </tbody>
                                 <tfoot>
                                     <tr class="bg-gray-100 border-t-2 border-gray-300">
-                                        <td colspan="3" class="p-3 text-right font-black uppercase text-gray-700">Total Pendapatan:</td>
-                                        <td id="rekap-total-rp" colspan="2" class="p-3 font-black text-green-700 text-lg">Rp 0</td>
+                                        <td colspan="7" class="p-3 text-right font-black uppercase text-gray-700">Total Pendapatan:</td>
+                                        <td id="rekap-total-rp" class="p-3 font-black text-green-700 text-lg text-right">Rp 0</td>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -485,120 +535,180 @@
             const tipe = document.getElementById('rekap-tipe').value;
             const valBulan = document.getElementById('rekap-val-bulan').value;
             const valTahun = document.getElementById('rekap-val-tahun').value;
-            
-            let filter = tipe === 'bulan' ? valBulan : valTahun;
+
+            const filter = tipe === 'bulan' ? valBulan : valTahun;
             if(!filter) return Swal.fire('Oops', 'Pilih filter periode/tahun dulu.', 'warning');
 
             const tbody = document.getElementById('tabel-rekap-preview');
-            tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-blue-500 font-bold animate-pulse">Menarik data dari server...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="p-6 text-center text-blue-500 font-bold animate-pulse">Menarik data dari server...</td></tr>';
             document.getElementById('btn-print-rekap').classList.add('hidden');
-            
+
             Swal.fire({ title: 'Merekap Data...', didOpen: () => Swal.showLoading() });
 
             try {
-                let actionApi = tipe === 'bulan' ? "getTagihan" : "getRekapTahun";
-                let payload = { action: actionApi };
+                const actionApi = tipe === 'bulan' ? 'getTagihan' : 'getRekapTahun';
+                const payload = { action: actionApi };
                 if(tipe === 'bulan') payload.namaPeriode = filter;
                 else payload.tahun = filter;
 
-                const res = await fetch(URL_API, { method: "POST", body: JSON.stringify(payload) }).then(r=>r.json());
-                
-                if(res.status === "success") {
+                const res = await fetch(URL_API, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                }).then(r => r.json());
+
+                if(res.status === 'success') {
                     globalDataRekap = res.data;
                     let total = 0;
-                    tbody.innerHTML = "";
-                    
+                    tbody.innerHTML = '';
+
                     if(res.data.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-500">Tidak ada data di periode ini.</td></tr>';
-                        document.getElementById('rekap-total-rp').innerText = "Rp 0";
+                        tbody.innerHTML = '<tr><td colspan="8" class="p-6 text-center text-gray-500">Tidak ada data di periode ini.</td></tr>';
+                        document.getElementById('rekap-total-rp').innerText = 'Rp 0';
                         Swal.close();
                         return;
                     }
 
                     res.data.forEach(x => {
-                        total += parseInt(x.total);
-                        let st = (x.status === true || x.status === "TRUE") ? "<span class='text-green-600 font-bold'>Lunas</span>" : "<span class='text-red-600 font-bold'>Belum</span>";
+                        const pemakaian = Number(x.pemakaian || 0);
+                        const totalTagihan = Number(x.total || 0);
+                        const biayaAir = pemakaian * 1000;
+                        const admin = Math.max(totalTagihan - biayaAir, 0);
+                        total += totalTagihan;
+
                         tbody.innerHTML += `
                             <tr class="hover:bg-gray-50">
                                 <td class="p-3 text-center font-medium">${x.periode || filter}</td>
-                                <td class="p-3 font-bold">${x.nama} <br><span class="text-xs text-gray-400 font-normal">${x.id}</span></td>
-                                <td class="p-3 text-center">${x.pemakaian}</td>
-                                <td class="p-3 text-right font-bold text-green-700">${formatRp(x.total)}</td>
-                                <td class="p-3 text-center">${st}</td>
+                                <td class="p-3 font-bold">${x.nama}<br><span class="text-xs text-gray-400 font-normal">${x.id}</span></td>
+                                <td class="p-3 text-center">${x.meterAwal}</td>
+                                <td class="p-3 text-center">${x.meterAkhir}</td>
+                                <td class="p-3 text-center font-semibold">${pemakaian}</td>
+                                <td class="p-3 text-right">${formatRp(biayaAir)}</td>
+                                <td class="p-3 text-right">${formatRp(admin)}</td>
+                                <td class="p-3 text-right font-black text-green-700">${formatRp(totalTagihan)}</td>
                             </tr>
                         `;
                     });
+
                     document.getElementById('rekap-total-rp').innerText = formatRp(total);
-                    document.getElementById('btn-print-rekap').classList.remove('hidden'); // Munculkan tombol print
+                    document.getElementById('btn-print-rekap').classList.remove('hidden');
                     Swal.close();
+                } else {
+                    Swal.fire('Error', res.pesan || 'Gagal memuat rekap', 'error');
                 }
             } catch (e) {
                 Swal.fire('Error', 'Gagal memuat rekap', 'error');
-                tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-red-500">Error!</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="p-6 text-center text-red-500">Error!</td></tr>';
             }
         }
 
         function cetakPDFRekap() {
             const tipe = document.getElementById('rekap-tipe').value;
-            const filter = tipe === 'bulan' ? document.getElementById('rekap-val-bulan').value : document.getElementById('rekap-val-tahun').value;
-            
-            let total = 0;
+            const filter = tipe === 'bulan'
+                ? document.getElementById('rekap-val-bulan').value
+                : document.getElementById('rekap-val-tahun').value;
+
+            if(!globalDataRekap || globalDataRekap.length === 0) {
+                return Swal.fire('Oops', 'Tarik data rekap terlebih dahulu.', 'warning');
+            }
+
+            let totalPendapatan = 0;
+            let totalPemakaian = 0;
+            let totalBiayaAir = 0;
+            let totalAdmin = 0;
             let rowsHtml = '';
-            
+
             globalDataRekap.forEach((x, i) => {
-                total += parseInt(x.total);
-                let st = (x.status === true || x.status === "TRUE") ? "Lunas" : "Belum Bayar";
+                const pemakaian = Number(x.pemakaian || 0);
+                const totalTagihan = Number(x.total || 0);
+                const biayaAir = pemakaian * 1000;
+                const admin = Math.max(totalTagihan - biayaAir, 0);
+
+                totalPemakaian += pemakaian;
+                totalBiayaAir += biayaAir;
+                totalAdmin += admin;
+                totalPendapatan += totalTagihan;
+
                 rowsHtml += `
                     <tr>
-                        <td style="text-align:center;">${i+1}</td>
-                        <td><b>${x.nama}</b><br><span style="font-size:11pt; color:#555;">ID: ${x.id}</span></td>
+                        <td style="text-align:center;">${i + 1}</td>
+                        <td><b>${x.nama}</b><br><span style="font-size:8.5pt;">ID: ${x.id}</span></td>
                         <td style="text-align:center;">${x.periode || filter}</td>
-                        <td style="text-align:center;">${x.pemakaian}</td>
-                        <td style="text-align:right;">${formatRp(x.total)}</td>
-                        <td style="text-align:center;">${st}</td>
+                        <td style="text-align:center;">${x.meterAwal}</td>
+                        <td style="text-align:center;">${x.meterAkhir}</td>
+                        <td style="text-align:center; font-weight:bold;">${pemakaian}</td>
+                        <td style="text-align:right;">${formatRp(biayaAir)}</td>
+                        <td style="text-align:right;">${formatRp(admin)}</td>
+                        <td style="text-align:right; font-weight:bold;">${formatRp(totalTagihan)}</td>
                     </tr>
                 `;
             });
 
-            // Template HTML Khusus Print Rekap (FONT 14pt)
-            let htmlPrint = `
-            <div class="rekap-container">
-                <div class="rekap-header">
-                    <h2>LAPORAN REKAPITULASI TAGIHAN AIR</h2>
-                    <p><b>PAMSIMAS</b> - Periode: ${filter}</p>
-                </div>
-                <table class="rekap-table">
-                    <thead>
-                        <tr>
-                            <th width="5%">No</th>
-                            <th width="30%">Nama Warga</th>
-                            <th width="15%">Bulan</th>
-                            <th width="10%">Pakai (m³)</th>
-                            <th width="20%">Tagihan (Rp)</th>
-                            <th width="20%">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${rowsHtml}
-                    </tbody>
-                </table>
-
-                <!-- Total sengaja DI LUAR tabel data. Jika diletakkan di <tfoot>,
-                     Chrome/Brave dapat mengulanginya sebagai footer pada setiap halaman. -->
-                <table class="rekap-total-table">
-                    <tr>
-                        <td class="rekap-total-label">TOTAL PENDAPATAN :</td>
-                        <td class="rekap-total-value">${formatRp(total)}</td>
-                    </tr>
-                </table>
-
-                <div class="rekap-ttd">
-                    <div class="rekap-ttd-box">
-                        <p style="margin-bottom: 70px;">Mengetahui,<br>Petugas Pamsimas,</p>
-                        <p style="font-weight:bold; text-decoration:underline;">Mujiyono</p>
+            const htmlPrint = `
+                <div class="rekap-container">
+                    <div class="rekap-header">
+                        <h2>LAPORAN REKAPITULASI TAGIHAN AIR</h2>
+                        <p><b>PAMSIMAS</b> - Periode: ${filter}</p>
+                        <p class="rekap-meta">Tarif air Rp 1.000/m³ &nbsp;|&nbsp; Rincian meter dan biaya per pelanggan</p>
                     </div>
-                </div>
-            </div>`;
+
+                    <table class="rekap-table">
+                        <colgroup>
+                            <col style="width:4%">
+                            <col style="width:18%">
+                            <col style="width:12%">
+                            <col style="width:9%">
+                            <col style="width:9%">
+                            <col style="width:8%">
+                            <col style="width:13%">
+                            <col style="width:11%">
+                            <col style="width:16%">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Nama Warga</th>
+                                <th>Bulan</th>
+                                <th>Meter Awal</th>
+                                <th>Meter Akhir</th>
+                                <th>Pakai<br>(m³)</th>
+                                <th>Biaya Air</th>
+                                <th>Admin</th>
+                                <th>Total Tagihan</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rowsHtml}</tbody>
+                    </table>
+
+                    <div class="rekap-summary">
+                        <div class="rekap-summary-row">
+                            <span>Jumlah pelanggan</span>
+                            <b>${globalDataRekap.length} pelanggan</b>
+                        </div>
+                        <div class="rekap-summary-row">
+                            <span>Total pemakaian</span>
+                            <b>${totalPemakaian} m³</b>
+                        </div>
+                        <div class="rekap-summary-row">
+                            <span>Total biaya air</span>
+                            <b>${formatRp(totalBiayaAir)}</b>
+                        </div>
+                        <div class="rekap-summary-row">
+                            <span>Total admin</span>
+                            <b>${formatRp(totalAdmin)}</b>
+                        </div>
+                        <div class="rekap-summary-row rekap-summary-total">
+                            <span>TOTAL PENDAPATAN</span>
+                            <span>${formatRp(totalPendapatan)}</span>
+                        </div>
+                    </div>
+
+                    <div class="rekap-ttd">
+                        <div class="rekap-ttd-box">
+                            <p style="margin-bottom: 55px;">Mengetahui,<br>Petugas Pamsimas,</p>
+                            <p style="font-weight:bold; text-decoration:underline;">Mujiyono</p>
+                        </div>
+                    </div>
+                </div>`;
 
             document.getElementById('print-area').innerHTML = htmlPrint;
             window.print();
