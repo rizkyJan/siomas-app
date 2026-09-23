@@ -807,13 +807,25 @@
                 </section>`;
         }
 
-        function bukaJendelaPrintThermal(isiNota, judul = 'Cetak Nota PAMSIMAS') {
+        function bukaJendelaPrintThermal(isiNota, judul = 'Cetak Nota PAMSIMAS', jumlahNota = 1) {
             const printWindow = window.open('', '_blank', 'width=430,height=760');
 
             if (!printWindow) {
                 Swal.fire('Popup diblokir', 'Izinkan popup browser agar nota dapat dicetak.', 'warning');
                 return;
             }
+
+            /*
+             * PENTING:
+             * Printer/driver ini bermasalah bila browser mengirim banyak PAGE.
+             * Karena itu beberapa nota digabung menjadi SATU SHEET PANJANG.
+             *
+             * Tinggi 1 nota = 110 mm.
+             * Batch dibatasi 20 nota => 2200 mm, masih aman di bawah
+             * form driver 58(48) x 3276 mm.
+             */
+            const TINGGI_NOTA_MM = 110;
+            const tinggiHalaman = Math.max(TINGGI_NOTA_MM, jumlahNota * TINGGI_NOTA_MM);
 
             printWindow.document.open();
             printWindow.document.write(`<!DOCTYPE html>
@@ -824,10 +836,7 @@
     <title>${escapeHTML(judul)}</title>
     <style>
         @page {
-            /* FIX BATCH PRINT:
-               Jangan pakai "auto", karena driver POS-80C memakai form 58 x 3276 mm.
-               Setiap pelanggan dibuat 1 nota pendek 58 x 110 mm. */
-            size: 58mm 110mm;
+            size: 58mm ${tinggiHalaman}mm;
             margin: 0;
         }
 
@@ -852,22 +861,18 @@
             text-rendering: optimizeLegibility;
         }
 
+        /*
+         * Tidak ada page-break di sini.
+         * Semua nota dalam 1 batch disusun vertikal di SATU SHEET.
+         */
         .thermal-receipt {
             width: 43mm;
-            min-height: 110mm;
+            height: 110mm;
             margin: 0 auto;
             padding: 4mm 0 0;
             color: #000;
             background: #fff;
-            page-break-inside: avoid;
-            break-inside: avoid;
-            page-break-after: always;
-            break-after: page;
-        }
-
-        .thermal-receipt:last-child {
-            page-break-after: auto;
-            break-after: auto;
+            overflow: hidden;
         }
 
         .receipt-center { text-align: center; }
@@ -965,21 +970,22 @@
             font-weight: 700;
         }
 
-        /* Ruang sobek manual di bawah nota.
-           10 mm cukup aman dan lebih hemat untuk cetak banyak. */
+        /*
+         * Ruang kosong untuk sobek manual.
+         * Karena tinggi .thermal-receipt sudah tetap 110 mm,
+         * ruang ini tetap berada di dalam tinggi nota.
+         */
         .receipt-feed-space {
             height: 10mm;
         }
 
         @media screen {
-            html, body {
-                min-height: 100%;
-            }
             body {
                 width: 58mm;
                 margin: 16px auto;
                 box-shadow: 0 0 0 1px #ddd;
             }
+
             .thermal-receipt {
                 border-bottom: 1px dashed #bbb;
             }
@@ -993,13 +999,9 @@
                 background: #fff !important;
             }
 
-            body {
-                font-weight: 700 !important;
-            }
-
             .thermal-receipt {
                 width: 43mm !important;
-                min-height: 110mm !important;
+                height: 110mm !important;
                 margin-left: auto !important;
                 margin-right: auto !important;
                 border: 0 !important;
@@ -1011,31 +1013,182 @@
     ${isiNota}
     <script>
         window.addEventListener('load', function () {
-            setTimeout(function () { window.print(); }, 350);
+            setTimeout(function () {
+                window.print();
+            }, 350);
         });
+
         window.addEventListener('afterprint', function () {
             window.close();
         });
     <\/script>
 </body>
 </html>`);
+
             printWindow.document.close();
         }
 
-        function cetakSemuaNota() {
+        /*
+         * Cetak 1 batch sebagai SATU SHEET PANJANG.
+         */
+        function cetakBatchNota(startIndex, endIndex) {
             const periode = document.getElementById('filter-periode').value;
-            if(!periode || globalDataTagihan.length === 0) {
-                return Swal.fire('Oops', 'Pilih periode yang ada datanya.', 'warning');
+            const dataBatch = globalDataTagihan.slice(startIndex, endIndex);
+
+            if (!periode || dataBatch.length === 0) {
+                return Swal.fire('Oops', 'Batch nota tidak memiliki data.', 'warning');
             }
 
-            const semuaNota = globalDataTagihan
+            const isiBatch = dataBatch
                 .map(p => generateHTMLNota(p, periode))
                 .join('');
 
             bukaJendelaPrintThermal(
-                semuaNota,
-                `Semua Nota ${periode}`
+                isiBatch,
+                `Nota ${periode} - ${startIndex + 1} s/d ${startIndex + dataBatch.length}`,
+                dataBatch.length
             );
+        }
+
+        /*
+         * Cetak semua:
+         * - <= 20 nota: langsung 1 sheet panjang.
+         * - > 20 nota: dibagi beberapa batch agar panjang tidak melebihi
+         *   batas form driver 3276 mm.
+         */
+        function cetakSemuaNota() {
+            const periode = document.getElementById('filter-periode').value;
+
+            if (!periode || globalDataTagihan.length === 0) {
+                return Swal.fire('Oops', 'Pilih periode yang ada datanya.', 'warning');
+            }
+
+            const BATCH_SIZE = 20;
+            const total = globalDataTagihan.length;
+
+            if (total <= BATCH_SIZE) {
+                cetakBatchNota(0, total);
+                return;
+            }
+
+            const totalBatch = Math.ceil(total / BATCH_SIZE);
+            let daftarBatch = '';
+
+            for (let i = 0; i < totalBatch; i++) {
+                const awal = i * BATCH_SIZE;
+                const akhir = Math.min(awal + BATCH_SIZE, total);
+
+                const pertama = globalDataTagihan[awal];
+                const terakhir = globalDataTagihan[akhir - 1];
+
+                daftarBatch += `
+                    <button
+                        onclick="window.opener.cetakBatchNota(${awal}, ${akhir})"
+                        style="
+                            width:100%;
+                            display:block;
+                            border:0;
+                            border-radius:12px;
+                            padding:14px 16px;
+                            margin:10px 0;
+                            background:#0f766e;
+                            color:#fff;
+                            font:700 14px Arial,sans-serif;
+                            cursor:pointer;
+                            text-align:left;
+                        "
+                    >
+                        Batch ${i + 1} — Nota ${awal + 1} s/d ${akhir}
+                        <span style="
+                            display:block;
+                            font-size:11px;
+                            font-weight:400;
+                            opacity:.9;
+                            margin-top:4px;
+                        ">
+                            ${escapeHTML(pertama?.id || '')}
+                            sampai
+                            ${escapeHTML(terakhir?.id || '')}
+                            · ${akhir - awal} nota
+                        </span>
+                    </button>`;
+            }
+
+            const manager = window.open('', '_blank', 'width=520,height=720');
+
+            if (!manager) {
+                return Swal.fire(
+                    'Popup diblokir',
+                    'Izinkan popup browser agar menu cetak batch dapat dibuka.',
+                    'warning'
+                );
+            }
+
+            manager.document.open();
+            manager.document.write(`<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cetak Semua Nota ${escapeHTML(periode)}</title>
+</head>
+<body style="
+    margin:0;
+    background:#f4f7f8;
+    font-family:Arial,sans-serif;
+    color:#17202a;
+">
+    <main style="
+        max-width:460px;
+        margin:0 auto;
+        padding:24px;
+    ">
+        <div style="
+            background:#fff;
+            border-radius:18px;
+            padding:22px;
+            box-shadow:0 8px 30px rgba(0,0,0,.08);
+        ">
+            <h2 style="margin:0 0 8px;font-size:20px;">
+                Cetak Semua Nota
+            </h2>
+
+            <p style="margin:0 0 6px;color:#4b5563;">
+                Periode:
+                <b>${escapeHTML(periode)}</b>
+            </p>
+
+            <p style="margin:0 0 18px;color:#4b5563;">
+                Total <b>${total} nota</b>
+                dibagi menjadi
+                <b>${totalBatch} batch</b>.
+            </p>
+
+            <div style="
+                padding:12px;
+                border-radius:10px;
+                background:#ecfeff;
+                color:#155e75;
+                font-size:12px;
+                line-height:1.5;
+                margin-bottom:16px;
+            ">
+                Setiap batch dicetak sebagai
+                <b>1 sheet panjang</b>,
+                bukan banyak halaman.
+                <br><br>
+                Klik <b>Batch 1</b> → Print.
+                Setelah selesai, kembali ke jendela ini
+                lalu lanjutkan Batch 2 dan seterusnya.
+            </div>
+
+            ${daftarBatch}
+        </div>
+    </main>
+</body>
+</html>`);
+
+            manager.document.close();
         }
 
         function cetakNotaIndividu(id) {
@@ -1043,12 +1196,17 @@
             const p = globalDataTagihan.find(x => x.id === id);
 
             if (!p) {
-                return Swal.fire('Data tidak ditemukan', 'Nota pelanggan tidak ditemukan.', 'error');
+                return Swal.fire(
+                    'Data tidak ditemukan',
+                    'Nota pelanggan tidak ditemukan.',
+                    'error'
+                );
             }
 
             bukaJendelaPrintThermal(
                 generateHTMLNota(p, periode),
-                `Nota ${p.id} - ${p.nama}`
+                `Nota ${p.id} - ${p.nama}`,
+                1
             );
         }
 
