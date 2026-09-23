@@ -824,7 +824,10 @@
     <title>${escapeHTML(judul)}</title>
     <style>
         @page {
-            size: 58mm auto;
+            /* FIX BATCH PRINT:
+               Jangan pakai "auto", karena driver POS-80C memakai form 58 x 3276 mm.
+               Setiap pelanggan dibuat 1 nota pendek 58 x 110 mm. */
+            size: 58mm 110mm;
             margin: 0;
         }
 
@@ -851,6 +854,7 @@
 
         .thermal-receipt {
             width: 43mm;
+            min-height: 110mm;
             margin: 0 auto;
             padding: 4mm 0 0;
             color: #000;
@@ -961,9 +965,10 @@
             font-weight: 700;
         }
 
-        /* Ruang ekstra agar bagian bawah nota tidak ikut tersobek. */
+        /* Ruang sobek manual di bawah nota.
+           10 mm cukup aman dan lebih hemat untuk cetak banyak. */
         .receipt-feed-space {
-            height: 20mm;
+            height: 10mm;
         }
 
         @media screen {
@@ -994,6 +999,7 @@
 
             .thermal-receipt {
                 width: 43mm !important;
+                min-height: 110mm !important;
                 margin-left: auto !important;
                 margin-right: auto !important;
                 border: 0 !important;
